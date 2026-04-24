@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NFTArtem | Хомяки + Ловля ворон</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(ellipse at center, #0a0f1a 0%, #03060c 100%);
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+            color: #fff;
+            padding: 18px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(2px 2px at 15% 20%, #fff, rgba(0,0,0,0));
+            background-repeat: no-repeat;
+            animation: starsShift 50s linear infinite;
+            opacity: 0.8;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes starsShift {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-80px, -60px) rotate(2deg); }
+        }
+
+        .ambient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 30%, rgba(0, 230, 120, 0.08), transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid #2eff9e;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #2eff9e, #00cc77);
+            color: #000;
+            border-color: gold;
+            box-shadow: 0 0 15px #2eff9e;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .top-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(16px);
+            border-radius: 60px;
+            padding: 10px 28px;
+            border: 1px solid #2eff9e;
+            box-shadow: 0 0 12px #2eff9e66;
+        }
+
+        .logo h1 {
+            font-size: 1.6rem;
+            background: linear-gradient(135deg, #FFD966, #FFA500);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .coin-panel {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #000000aa;
+            padding: 5px 20px;
+            border-radius: 50px;
+            border: 1px solid gold;
+        }
+
+        .coin-amount {
+            font-size: 28px;
+            font-weight: 800;
+            color: gold;
+        }
+
+        .user-area {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #1f2a3e;
+            border: none;
+            color: white;
+            font-weight: bold;
+            padding: 7px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #e6b422, #ffcc44);
+            color: #1e1a0c;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: rgba(8, 12, 20, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 38px;
+            padding: 20px;
+            border: 1px solid rgba(46, 255, 158, 0.5);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            border-left: 5px solid #2eff9e;
+            padding-left: 16px;
+            margin-bottom: 16px;
+        }
+
+        .clicker-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .clicker-btn {
+            background: #1e2a3a;
+            font-size: 64px;
+            padding: 20px 10px;
+            border-radius: 24px;
+            cursor: pointer;
+            text-align: center;
+            transition: transform 0.08s linear;
+            box-shadow: 0 8px 0 #0f121c;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+        }
+
+        .clicker-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #0f121c;
+        }
+
+        .shop-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0e121fcc;
+            padding: 10px 16px;
+            border-radius: 60px;
+            margin-bottom: 10px;
+        }
+
+        .casino-area {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+
+        .bet-input {
+            background: #010101;
+            border: 1px solid #2eff9e;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 40px;
+            width: 120px;
+        }
+
+        .collection {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .nft-card {
+            background: linear-gradient(145deg, #1f1b1b, #0f0c0a);
+            border-radius: 24px;
+            padding: 8px;
+            width: 100px;
+            text-align: center;
+            border: 1px solid #ffcd7e;
+            cursor: pointer;
+        }
+
+        .nft-card.owned {
+            background: #2a451f;
+            border-color: gold;
+        }
+
+        .game-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(180deg, #1a3a5c 0%, #2d5f7e 50%, #4a8b5c 100%);
+            border-radius: 30px;
+            overflow: hidden;
+            cursor: crosshair;
+            margin: 15px 0;
+            border: 2px solid #2eff9e;
+            box-shadow: 0 0 20px rgba(46,255,158,0.3);
+        }
+
+        .falling-item {
+            position: absolute;
+            font-size: 48px;
+            cursor: pointer;
+            transition: transform 0.05s linear;
+            z-index: 10;
+            filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
+            animation: wobble 0.3s ease-in-out infinite;
+        }
+
+        .falling-item:hover {
+            transform: scale(1.1);
+        }
+
+        @keyframes wobble {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.6);
+            padding: 10px 20px;
+            border-radius: 30px;
+            margin-bottom: 15px;
+        }
+
+        .game-stats {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .game-stats span {
+            color: #ffcc44;
+            font-size: 1.5rem;
+        }
+
+        .combo-effect {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: gold;
+            text-shadow: 0 0 5px red;
+            pointer-events: none;
+            animation: floatUp 0.6s ease-out forwards;
+            z-index: 100;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-50px); }
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .users-table th, .users-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #2eff9e;
+        }
+
+        .users-table th {
+            background: #2eff9e33;
+            color: #2eff9e;
+        }
+
+        .online-badge {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #2eff9e;
+            box-shadow: 0 0 5px #2eff9e;
+            margin-right: 8px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        input, select {
+            background: #222;
+            border: 1px solid #2eff9e;
+            padding: 8px 12px;
+            border-radius: 40px;
+            color: white;
+        }
+
+        .status {
+            background: #000000bb;
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+        }
+
+        .online-count {
+            font-size: 1.2rem;
+            color: #2eff9e;
+            margin-left: 10px;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .social-card {
+            background: rgba(0,0,0,0.5);
+            border-radius: 30px;
+            padding: 25px;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            border: 2px solid #2eff9e;
+            transition: 0.3s;
+        }
+
+        .social-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px #2eff9e;
+        }
+
+        .social-card a {
+            color: #2eff9e;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .join-btn {
+            background: linear-gradient(135deg, #0088cc, #00aaff);
+            margin-top: 15px;
+            padding: 12px 30px;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+<div class="ambient"></div>
+<div class="app-container">
+    <div class="top-bar">
+        <div class="logo"><h1>🎴 NFTArtem</h1></div>
+        <div class="coin-panel">🪙 <span class="coin-amount" id="artemCoinsDisplay">0</span></div>
+        <div class="user-area">
+            <span id="userNameSpan" class="status">Гость</span>
+            <button id="loginBtn">🔐 Вход</button>
+            <button id="registerBtn">📝 Регистр</button>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="game">🎮 Игра</button>
+        <button class="tab-btn" data-tab="raven">🦆 Ловля ворон</button>
+        <button class="tab-btn" data-tab="admin">👑 Админ панель</button>
+        <button class="tab-btn" data-tab="social">📱 Соцсети</button>
+    </div>
+
+    <!-- Вкладка с основной игрой -->
+    <div id="gameTab" class="tab-content active">
+        <div class="grid-2col">
+            <div class="card">
+                <h2>🐹 Хомячий кликер</h2>
+                <div class="clicker-grid" id="clickerGrid"></div>
+                <button id="playGameBtn" class="btn-gold" style="width:100%">🎲 ИГРАТЬ (30 сек)</button>
+                <div class="status" id="gameTimerStatus">⚡ 30 СЕКУНД готово</div>
+            </div>
+            <div class="card">
+                <h2>🎰 КАЗИНО ARTEM</h2>
+                <div class="casino-area">
+                    <input type="number" id="betAmount" class="bet-input" value="100" step="50">
+                    <button id="coinFlipBtn" class="btn-gold">🪙 ОРЁЛ/РЕШКА</button>
+                    <button id="diceBtn" class="btn-gold">🎲 КУБИК (x2)</button>
+                </div>
+                <div id="casinoResult" class="status">💬 Сделай ставку</div>
+            </div>
+        </div>
+
+        <div class="grid-2col">
+            <div class="card">
+                <h2>🛠️ УЛУЧШЕНИЯ</h2>
+                <div id="shopContainer" class="shop-items"></div>
+            </div>
+            <div class="card">
+                <h2>🤖 АВТОКЛИКЕР ЗА 100000</h2>
+                <div id="autoContainer" class="privilege-items"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🃏 КОЛЛЕКЦИЯ КАРТ</h2>
+            <div id="nftCollection" class="collection"></div>
+            <div class="status">★ Владей картами Artem</div>
+        </div>
+    </div>
+
+    <!-- Вкладка с игрой "Ловля ворон" -->
+    <div id="ravenTab" class="tab-content">
+        <div class="card">
+            <h2>🦆 ЛОВЛЯ ВОРОН</h2>
+            <div class="score-board">
+                <div class="game-stats">🪙 За ворону: <span>10</span> монет</div>
+                <div class="game-stats">🎯 Поймано: <span id="ravenScore">0</span></div>
+                <div class="game-stats">🔥 Комбо: <span id="comboCount">0</span>x</div>
+            </div>
+            <div id="ravenGameContainer" class="game-container" style="position: relative; height: 400px;">
+                <!-- Вороны будут появляться здесь -->
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button id="startRavenGame" class="btn-gold" style="flex:1">🦆 СТАРТ ЛОВЛИ</button>
+                <button id="stopRavenGame" style="flex:1; background: #8b0000;">⏹️ СТОП</button>
+            </div>
+            <div class="status" id="ravenStatus">⚡ Нажми СТАРТ, чтобы начать ловить ворон!</div>
+            <div class="status" style="margin-top: 10px;">💡 Бонус: каждые 5 ворон подряд = x2 монеты! Золотая ворона даёт +50 монет!</div>
+        </div>
+    </div>
+
+    <!-- Вкладка с админ панелью -->
+    <div id="adminTab" class="tab-content">
+        <div class="card">
+            <h2>🔧 АДМИН-ПАНЕЛЬ</h2>
+            
+            <div id="adminLockBlock">
+                <div class="flex-row">
+                    <input type="password" id="adminPasswordInput" placeholder="Пароль админа">
+                    <button id="unlockAdminBtn2" class="btn-gold">🔓 Войти в админку</button>
+                </div>
+            </div>
+
+            <div id="adminContent" style="display:none;">
+                <div class="status" style="margin-bottom: 15px; background: #2eff9e22;">
+                    🟢 Режим администратора активен
+                </div>
+
+                <h3>🟢 Онлайн сейчас <span id="onlineCount" class="online-count">0</span></h3>
+                <div id="onlineUsersList" class="status" style="margin-bottom: 20px;"></div>
+
+                <h3>📋 Все пользователи (с паролями)</h3>
+                <div style="overflow-x: auto;">
+                    <table class="users-table" id="usersTable">
+                        <thead>
+                            <tr><th>Никнейм</th><th>Пароль</th><th>Монеты</th><th>Карты</th><th>Статус</th></tr>
+                        </thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+
+                <h3 style="margin-top: 20px;">💰 Управление</h3>
+                <div class="flex-row">
+                    <input type="text" id="adminUser" placeholder="username">
+                    <input type="number" id="adminCoins" placeholder="монеты">
+                    <button id="adminSetCoinsBtn" class="btn-gold">💰 Выдать монеты</button>
+                    <button id="adminGiveCardBtn" class="btn-gold">💎 Дать все карты</button>
+                    <button id="adminResetGameBtn">⚠️ Сброс данных</button>
+                </div>
+                <div id="adminMessage" class="status"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Вкладка с соцсетями -->
+    <div id="socialTab" class="tab-content">
+        <div class="card">
+            <h2>📱 СОЦИАЛЬНЫЕ СЕТИ ПРОЕКТА</h2>
+            <div class="social-links">
+                <div class="social-card">
+                    <a href="https://t.me/Dimochkagame" target="_blank">
+                        <span class="telegram-icon">📱</span>
+                        <span>Telegram канал</span>
+                    </a>
+                    <p style="margin-top: 15px; color: #aaa;">Новости, обновления, розыгрыши и общение</p>
+                    <a href="https://t.me/Dimochkagame" target="_blank">
+                        <button class="join-btn btn-gold">🔗 ПОДПИСАТЬСЯ</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ADMIN_PASSWORD = "artem2024";
+    
+    let currentUser = null;
+    let gameActive = false;
+    let clickPower = 1;
+    let isAdminUnlocked = false;
+    let activeUsers = new Map();
+
+    // Переменные для игры "Ловля ворон"
+    let ravenGameActive = false;
+    let ravenScore = 0;
+    let combo = 0;
+    let ravenInterval = null;
+    let fallIntervals = [];
+
+    const upgrades = [
+        { id: "power1", name: "🐾 Лапа +1", price: 150, effect: (u) => { u.clickBonus = (u.clickBonus||1)+1; return u; } },
+        { id: "power2", name: "🦷 Клык +3", price: 400, effect: (u) => { u.clickBonus = (u.clickBonus||1)+3; return u; } }
+    ];
+
+    const allCards = [
+        { id: "cardArtem", name: "Artem OG", emoji:"🐹", price:500 },
+        { id: "cardGold", name: "Золотой Хомяк", emoji:"🏆", price:1200 },
+        { id: "cardLucky", name: "Удачливый", emoji:"🍀", price:800 },
+        { id: "cardGamer", name: "Геймер", emoji:"🎮", price:1000 },
+        { id: "cardKing", name: "Король клика", emoji:"👑", price:2000 },
+        { id: "cardCasino", name: "Казино-мастер", emoji:"🎰", price:1500 }
+    ];
+
+    // Функции для игры "Ловля ворон"
+    function showComboEffect(x, y, text) {
+        const effect = document.createElement('div');
+        effect.className = 'combo-effect';
+        effect.textContent = text;
+        effect.style.left = x + 'px';
+        effect.style.top = y + 'px';
+        document.getElementById('ravenGameContainer').appendChild(effect);
+        setTimeout(() => effect.remove(), 600);
+    }
+
+    function catchRaven(element, isGolden = false) {
+        if (!currentUser || !ravenGameActive) return;
+        
+        let reward = isGolden ? 50 : 10;
+        
+        // Бонус за комбо
+        combo++;
+        let comboBonus = 1;
+        if (combo >= 5 && combo < 10) comboBonus = 2;
+        else if (combo >= 10) comboBonus = 3;
+        
+        let totalReward = reward * comboBonus;
+        
+        currentUser.coins += totalReward;
+        ravenScore++;
+        
+        // Анимация
+        const rect = element.getBoundingClientRect();
+        const containerRect = document.getElementById('ravenGameContainer').getBoundingClientRect();
+        showComboEffect(rect.left - containerRect.left, rect.top - containerRect.top, 
+            `${isGolden ? '🌟 ЗОЛОТАЯ! ' : '🦆 '}+${totalReward} 🪙 ${comboBonus > 1 ? ' (x' + comboBonus + ' комбо!)' : ''}`);
+        
+        element.remove();
+        syncUI();
+        
+        document.getElementById('ravenScore').innerText = ravenScore;
+        document.getElementById('comboCount').innerText = combo;
+        
+        // Поздравление при хорошем комбо
+        if (combo === 5) showToast("🔥 КОМБО x2! Теперь вороны дают в 2 раза больше!");
+        if (combo === 10) showToast("💥 МЕГА КОМБО x3! Удвоенная награда!");
+    }
+
+    function createRaven() {
+        if (!ravenGameActive) return;
+        
+        const container = document.getElementById('ravenGameContainer');
+        const raven = document.createElement('div');
+        raven.className = 'falling-item';
+        
+        // 10% шанс на золотую ворону
+        const isGolden = Math.random() < 0.1;
+        raven.innerHTML = isGolden ? '🌟🦆🌟' : '🦆';
+        raven.style.fontSize = isGolden ? '56px' : '48px';
+        raven.style.left = Math.random() * (container.clientWidth - 60) + 'px';
+        raven.style.top = '0px';
+        
+        raven.addEventListener('click', (e) => {
+            e.stopPropagation();
+            catchRaven(raven, isGolden);
+        });
+        
+        container.appendChild(raven);
+        
+        const speed = 2 + Math.random() * 3;
+        let pos = 0;
+        
+        const fallInterval = setInterval(() => {
+            if (!ravenGameActive || !raven.parentNode) {
+                clearInterval(fallInterval);
+                if (raven.parentNode) raven.remove();
+                return;
+            }
+            pos += speed;
+            raven.style.top = pos + 'px';
+            
+            if (pos >= container.clientHeight - 60) {
+                clearInterval(fallInterval);
+                if (raven.parentNode) raven.remove();
+                combo = 0;
+                document.getElementById('comboCount').innerText = combo;
+            }
+        }, 20);
+        
+        fallIntervals.push(fallInterval);
+    }
+
+    function startRavenGame() {
+        if (!currentUser) {
+            showToast("Сначала войди в аккаунт!");
+            return;
+        }
+        if (ravenGameActive) return;
+        
+        ravenGameActive = true;
+        ravenScore = 0;
+        combo = 0;
+        document.getElementById('ravenScore').innerText = '0';
+        document.getElementById('comboCount').innerText = '0';
+        document.getElementById('ravenStatus').innerHTML = '🦆 ИГРА АКТИВНА! Лови ворон!';
+        document.getElementById('ravenStatus').style.background = '#2eff9e22';
+        
+        // Очищаем контейнер
+        document.getElementById('ravenGameContainer').innerHTML = '';
+        
+        // Создаем ворон каждые 0.8 секунды
+        ravenInterval = setInterval(() => {
+            if (ravenGameActive) createRaven();
+        }, 800);
+    }
+
+    function stopRavenGame() {
+        ravenGameActive = false;
+        if (ravenInterval) clearInterval(ravenInterval);
+        fallIntervals.forEach(interval => clearInterval(interval));
+        fallIntervals = [];
+        document.getElementById('ravenGameContainer').innerHTML = '';
+        document.getElementById('ravenStatus').innerHTML = '⚡ Игра остановлена. Нажми СТАРТ чтобы играть снова!';
+        document.getElementById('ravenStatus').style.background = '#000000bb';
+    }
+
+    function updateOnlineStatus() {
+        if (currentUser) {
+            activeUsers.set(currentUser.username, Date.now());
+        }
+        const now = Date.now();
+        for (let [user, time] of activeUsers) {
+            if (now - time > 30000) activeUsers.delete(user);
+        }
+        
+        if (isAdminUnlocked && document.getElementById("adminContent").style.display !== "none") {
+            document.getElementById("onlineCount").innerText = activeUsers.size;
+            document.getElementById("onlineUsersList").innerHTML = activeUsers.size === 0 ? "🔴 Нет активных пользователей" : Array.from(activeUsers.keys()).map(u => `🟢 ${u}`).join(", ");
+            renderUsersTable();
+        }
+    }
+
+    function getAllUsers() {
+        let users = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            let key = localStorage.key(i);
+            if (key && key.startsWith("user_")) {
+                try {
+                    let userData = JSON.parse(localStorage.getItem(key));
+                    if (userData && userData.username) users.push(userData);
+                } catch(e) {}
+            }
+        }
+        return users;
+    }
+
+    function renderUsersTable() {
+        let users = getAllUsers();
+        users.sort((a,b) => (b.coins||0) - (a.coins||0));
+        let tbody = document.getElementById("usersTableBody");
+        tbody.innerHTML = "";
+        users.forEach(user => {
+            let isOnline = activeUsers.has(user.username);
+            let row = tbody.insertRow();
+            row.innerHTML = `
+                <td>${user.username}</td>
+                <td style="color: #ffcc88;">${user.password || user.username}</td>
+                <td>💰 ${Math.floor(user.coins || 0)}</td>
+                <td>🎴 ${(user.cardsOwned || []).length}/${allCards.length}</td>
+                <td>${isOnline ? '<span class="online-badge"></span> Онлайн' : '⚫ Офлайн'}</td>
+            `;
+        });
+        if (users.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='5'>Нет зарегистрированных пользователей</td></tr>";
+        }
+    }
+
+    function saveUser() {
+        if (currentUser) {
+            currentUser.password = currentUser.username;
+            localStorage.setItem(`user_${currentUser.username}`, JSON.stringify(currentUser));
+        }
+    }
+    
+    function loadUser(username) {
+        let raw = localStorage.getItem(`user_${username}`);
+        if (raw) {
+            let data = JSON.parse(raw);
+            return { ...data, cardsOwned: data.cardsOwned||[], upgrades: data.upgrades||[], clickBonus: data.clickBonus||1, autoPerSec: data.autoPerSec||0, password: data.password || username };
+        }
+        return null;
+    }
+    
+    function createUser(username) {
+        return { username, password: username, coins: 1600, cardsOwned: [], upgrades: [], clickBonus: 1, autoPerSec: 0 };
+    }
+    
+    function registerUser(username) {
+        if (!username.trim()) return false;
+        if (localStorage.getItem(`user_${username}`)) return false;
+        currentUser = createUser(username);
+        localStorage.setItem(`user_${username}`, JSON.stringify(currentUser));
+        syncUI();
+        return true;
+    }
+    
+    function loginUser(username) {
+        let data = loadUser(username);
+        if (data) {
+            currentUser = data;
+            syncUI();
+            updateOnlineStatus();
+            return true;
+        }
+        return false;
+    }
+    
+    function syncUI() {
+        if (!currentUser) {
+            document.getElementById("artemCoinsDisplay").innerText = "0";
+            document.getElementById("userNameSpan").innerHTML = "Гость";
+            renderShop(); renderAuto(); renderCards();
+            return;
+        }
+        document.getElementById("artemCoinsDisplay").innerText = Math.floor(currentUser.coins);
+        document.getElementById("userNameSpan").innerHTML = `👤 ${currentUser.username}`;
+        clickPower = currentUser.clickBonus;
+        renderShop(); renderAuto(); renderCards();
+        saveUser();
+        if (window.autoInterval) clearInterval(window.autoInterval);
+        window.autoInterval = setInterval(() => {
+            if (currentUser && currentUser.autoPerSec > 0) {
+                currentUser.coins += currentUser.autoPerSec;
+                if (currentUser.coins < 0) currentUser.coins = 0;
+                document.getElementById("artemCoinsDisplay").innerText = Math.floor(currentUser.coins);
+                saveUser();
+            }
+        }, 1000);
+        updateOnlineStatus();
+    }
+    
+    function renderShop() {
+        let container = document.getElementById("shopContainer");
+        if (!currentUser) { container.innerHTML = `<div class="status">🔒 Войдите</div>`; return; }
+        container.innerHTML = "";
+        upgrades.forEach(item => {
+            let owned = (currentUser.upgrades || []).includes(item.id);
+            let div = document.createElement("div");
+            div.className = "shop-row";
+            div.innerHTML = `<span><strong>${item.name}</strong> — ${item.price}🪙</span><button ${owned ? 'disabled' : ''} class="${owned ? '' : 'btn-gold'}">${owned ? '✅ Куплено' : 'Купить'}</button>`;
+            if (!owned) {
+                div.querySelector("button").addEventListener("click", () => {
+                    if (currentUser.coins >= item.price) {
+                        currentUser.coins -= item.price;
+                        if (!currentUser.upgrades) currentUser.upgrades = [];
+                        currentUser.upgrades.push(item.id);
+                        currentUser = item.effect(currentUser);
+                        syncUI();
+                        showToast(`+ ${item.name}`);
+                    } else showToast("Не хватает монет");
+                });
+            }
+            container.appendChild(div);
+        });
+    }
+    
+    function renderAuto() {
+        let container = document.getElementById("autoContainer");
+        if (!currentUser) { container.innerHTML = `<div class="status">🔒 Войдите</div>`; return; }
+        container.innerHTML = "";
+        let hasAuto = (currentUser.upgrades || []).includes("auto");
+        let div = document.createElement("div");
+        div.className = "shop-row";
+        let currentLvl = currentUser.autoPerSec || 0;
+        div.innerHTML = `<span><strong>🤖 АВТОКЛИКЕР</strong><br><span style="font-size:12px;">+1 мон/сек | Сейчас: +${currentLvl} мон/сек</span></span>
+                         <button ${hasAuto ? 'disabled' : ''} class="${hasAuto ? '' : 'btn-gold'}">${hasAuto ? '✅ Куплен' : 'Купить за 100000'}</button>`;
+        if (!hasAuto) {
+            div.querySelector("button").addEventListener("click", () => {
+                if (currentUser.coins >= 100000) {
+                    currentUser.coins -= 100000;
+                    if (!currentUser.upgrades) currentUser.upgrades = [];
+                    currentUser.upgrades.push("auto");
+                    currentUser.autoPerSec = (currentUser.autoPerSec || 0) + 1;
+                    syncUI();
+                    showToast("🎫 Автокликер активирован! +1 мон/сек");
+                } else showToast("Нужно 100000 монет");
+            });
+        }
+        container.appendChild(div);
+    }
+    
+    function renderCards() {
+        let container = document.getElementById("nftCollection");
+        if (!currentUser) { container.innerHTML = `<div class="status">🔓 Войдите</div>`; return; }
+        container.innerHTML = "";
+        allCards.forEach(card => {
+            let owned = currentUser.cardsOwned.includes(card.id);
+            let cd = document.createElement("div");
+            cd.className = `nft-card ${owned ? 'owned' : ''}`;
+            cd.innerHTML = `<div style="font-size:36px">${card.emoji}</div><div>${card.name}</div><div style="font-size:10px">${owned ? '✔️ Владелец' : card.price + '🪙'}</div>`;
+            if (!owned) {
+                cd.style.cursor = "pointer";
+                cd.addEventListener("click", () => {
+                    if (currentUser.coins >= card.price) {
+                        currentUser.coins -= card.price;
+                        currentUser.cardsOwned.push(card.id);
+                        syncUI();
+                        showToast(`🎉 Карта ${card.name}`);
+                    } else showToast("Монет не хватает");
+                });
+            }
+            container.appendChild(cd);
+        });
+    }
+    
+    function initClicker() {
+        let grid = document.getElementById("clickerGrid");
+        grid.innerHTML = "";
+        for (let i = 0; i < 9; i++) {
+            let btn = document.createElement("div");
+            btn.className = "clicker-btn";
+            btn.innerHTML = "🐹";
+            btn.addEventListener("click", () => {
+                if (!currentUser) { showToast("Войдите"); return; }
+                currentUser.coins += clickPower;
+                syncUI();
+                btn.style.transform = "scale(0.95)";
+                setTimeout(() => btn.style.transform = "", 100);
+            });
+            grid.appendChild(btn);
+        }
+    }
+    
+    function startGame30sec() {
+        if (!currentUser) { showToast("Нужен аккаунт"); return; }
+        if (gameActive) return;
+        gameActive = true;
+        let clicks = 0, timeLeft = 30;
+        const statusDiv = document.getElementById("gameTimerStatus");
+        statusDiv.innerHTML = "⏳ 30 СЕКУНД — КЛИКАЙ!";
+        let timer = setInterval(() => {
+            if (!gameActive) { clearInterval(timer); return; }
+            timeLeft--;
+            statusDiv.innerHTML = `⏱️ ${timeLeft} сек | Кликов: ${clicks}`;
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                gameActive = false;
+                let reward = clicks * 5;
+                currentUser.coins += reward;
+                syncUI();
+                statusDiv.innerHTML = `✅ +${reward} монет (${clicks} кликов)`;
+            }
+        }, 1000);
+        let handler = (e) => {
+            if (!gameActive) { document.removeEventListener("click", handler); return; }
+            if (e.target.closest('.clicker-btn')) clicks++;
+        };
+        document.addEventListener("click", handler);
+        setTimeout(() => { gameActive = false; document.removeEventListener("click", handler); }, 30000);
+    }
+    
+    function casinoCoinFlip(bet) {
+        if (!currentUser) return "🔒 Войдите";
+        if (currentUser.coins < bet) return "❌ Не хватает монет";
+        let win = Math.random() < 0.45;
+        if (win) {
+            currentUser.coins += bet;
+            syncUI();
+            return `🪙 ОРЁЛ! +${bet} монет (45%)`;
+        } else {
+            currentUser.coins -= bet;
+            syncUI();
+            return `🪙 РЕШКА! -${bet} монет (55%)`;
+        }
+    }
+    
+    function casinoDice(bet) {
+        if (!currentUser) return "🔒 Войдите";
+        if (currentUser.coins < bet) return "❌ Не хватает монет";
+        let d = Math.floor(Math.random() * 6) + 1;
+        if (d >= 5) {
+            let win = bet * 2;
+            currentUser.coins += win;
+            syncUI();
+            return `🎲 ${d}! ВЫИГРЫШ x2 +${win} монет (33%)`;
+        } else {
+            currentUser.coins -= bet;
+            syncUI();
+            return `🎲 ${d} Проигрыш -${bet} монет (67%)`;
+        }
+    }
+    
+    function showToast(msg) {
+        let t = document.createElement("div");
+        t.innerText = msg;
+        t.style.position = "fixed";
+        t.style.bottom = "20px";
+        t.style.left = "20px";
+        t.style.background = "#000000cc";
+        t.style.color = "#2eff9e";
+        t.style.padding = "8px 16px";
+        t.style.borderRadius = "40px";
+        t.style.zIndex = "9999";
+        t.style.fontWeight = "bold";
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 2000);
+    }
+    
+    function unlockAdmin(password) {
+        if (password === ADMIN_PASSWORD) {
+            isAdminUnlocked = true;
+            document.getElementById("adminContent").style.display = "block";
+            document.getElementById("adminLockBlock").style.display = "none";
+            showToast("✅ Доступ к админ-панели получен!");
+            updateOnlineStatus();
+            setInterval(updateOnlineStatus, 5000);
+            return true;
+        } else {
+            showToast("❌ Неверный пароль!");
+            return false;
+        }
+    }
+    
+    // Табы
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+            document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById(btn.dataset.tab + "Tab").classList.add("active");
+            if (btn.dataset.tab === "admin" && isAdminUnlocked) updateOnlineStatus();
+            // Останавливаем игру с воронами при уходе с вкладки
+            if (btn.dataset.tab !== "raven" && ravenGameActive) {
+                stopRavenGame();
+            }
+        });
+    });
+    
+    // Админ кнопки
+    document.getElementById("unlockAdminBtn2").addEventListener("click", () => {
+        unlockAdmin(document.getElementById("adminPasswordInput").value);
+    });
+    
+    document.getElementById("adminSetCoinsBtn").addEventListener("click", () => {
+        if (!isAdminUnlocked) { showToast("❌ Админ-панель заблокирована!"); return; }
+        let name = document.getElementById("adminUser").value.trim();
+        let val = parseInt(document.getElementById("adminCoins").value);
+        if (!name || isNaN(val)) { showToast("Введите имя и сумму"); return; }
+        let target = loadUser(name);
+        if (target) {
+            target.coins += val;
+            localStorage.setItem(`user_${name}`, JSON.stringify(target));
+            if (currentUser && currentUser.username === name) { currentUser.coins = target.coins; syncUI(); }
+            showToast(`✅ ${name} +${val} монет`);
+            renderUsersTable();
+        } else showToast("Пользователь не найден");
+    });
+    
+    document.getElementById("adminGiveCardBtn").addEventListener("click", () => {
+        if (!isAdminUnlocked) { showToast("❌ Админ-панель заблокирована!"); return; }
+        let name = document.getElementById("adminUser").value.trim();
+        if (!name) { showToast("Введите имя"); return; }
+        let target = loadUser(name);
+        if (target) {
+            let allIds = allCards.map(c => c.id);
+            target.cardsOwned = [...new Set([...target.cardsOwned, ...allIds])];
+            localStorage.setItem(`user_${name}`, JSON.stringify(target));
+            if (currentUser && currentUser.username === name) { currentUser.cardsOwned = target.cardsOwned; syncUI(); }
+            showToast(`💎 Все карты для ${name}`);
+            renderUsersTable();
+        } else showToast("Нет юзера");
+    });
+    
+    document.getElementById("adminResetGameBtn").addEventListener("click", () => {
+        if (!isAdminUnlocked) { showToast("❌ Админ-панель заблокирована!"); return; }
+        if (confirm("Сбросить всех пользователей? Это действие необратимо!")) {
+            localStorage.clear();
+            currentUser = null;
+            syncUI();
+            showToast("Все данные сброшены");
+            location.reload();
+        }
+    });
+    
+    // Кнопки для игры "Ловля ворон"
+    document.getElementById("startRavenGame").onclick = startRavenGame;
+    document.getElementById("stopRavenGame").onclick = stopRavenGame;
+    
+    document.getElementById("loginBtn").onclick = () => {
+        let n = prompt("Логин:");
+        if (n && loginUser(n)) showToast(`Привет, ${n}!`);
+        else if (n) showToast("Нет такого пользователя");
+    };
+    
+    document.getElementById("registerBtn").onclick = () => {
+        let n = prompt("Новый логин:");
+        if (n && registerUser(n)) showToast(`Аккаунт ${n} создан +1600 монет!`);
+        else if (n) showToast("Имя занято");
+    };
+    
+    document.getElementById("playGameBtn").onclick = startGame30sec;
+    document.getElementById("coinFlipBtn").onclick = () => {
+        let bet = parseInt(document.getElementById("betAmount").value) || 100;
+        document.getElementById("casinoResult").innerText = casinoCoinFlip(bet);
+    };
+    document.getElementById("diceBtn").onclick = () => {
+        let bet = parseInt(document.getElementById("betAmount").value) || 100;
+        document.getElementById("casinoResult").innerText = casinoDice(bet);
+    };
+    
+    setInterval(() => { if (currentUser) updateOnlineStatus(); }, 5000);
+    
+    initClicker();
+    syncUI();
+</script>
+</body>
+</html>
