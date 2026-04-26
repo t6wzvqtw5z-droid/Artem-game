@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NFTArtem | Хомяки + Ловля ворон + Котолапа</title>
+    <title>NFTArtem | Хомяки + Вороны + Котолапа</title>
     <style>
         * {
             margin: 0;
@@ -20,37 +20,6 @@
             padding: 18px;
             position: relative;
             overflow-x: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: radial-gradient(2px 2px at 15% 20%, #fff, rgba(0,0,0,0));
-            background-repeat: no-repeat;
-            animation: starsShift 50s linear infinite;
-            opacity: 0.8;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        @keyframes starsShift {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            100% { transform: translate(-80px, -60px) rotate(2deg); }
-        }
-
-        .ambient {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 50% 30%, rgba(0, 230, 120, 0.08), transparent 70%);
-            pointer-events: none;
-            z-index: 0;
         }
 
         .app-container {
@@ -155,6 +124,11 @@
             border-radius: 40px;
             cursor: pointer;
             transition: 0.2s;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .btn-gold {
@@ -266,7 +240,6 @@
             cursor: crosshair;
             margin: 15px 0;
             border: 2px solid #2eff9e;
-            box-shadow: 0 0 20px rgba(46,255,158,0.3);
         }
         
         .catpaw-container {
@@ -281,16 +254,10 @@
             transition: transform 0.05s linear;
             z-index: 10;
             filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
-            animation: wobble 0.3s ease-in-out infinite;
         }
 
         .falling-item:hover {
             transform: scale(1.1);
-        }
-
-        @keyframes wobble {
-            0%, 100% { transform: rotate(0deg); }
-            50% { transform: rotate(5deg); }
         }
 
         .score-board {
@@ -384,12 +351,6 @@
             font-size: 0.85rem;
         }
 
-        .online-count {
-            font-size: 1.2rem;
-            color: #2eff9e;
-            margin-left: 10px;
-        }
-
         .social-links {
             display: flex;
             flex-direction: column;
@@ -435,7 +396,6 @@
     </style>
 </head>
 <body>
-<div class="ambient"></div>
 <div class="app-container">
     <div class="top-bar">
         <div class="logo"><h1>🎴 NFTArtem</h1></div>
@@ -482,7 +442,7 @@
             </div>
             <div class="card">
                 <h2>🤖 АВТОКЛИКЕР ЗА 100000</h2>
-                <div id="autoContainer" class="privilege-items"></div>
+                <div id="autoContainer"></div>
             </div>
         </div>
 
@@ -508,7 +468,6 @@
                 <button id="stopRavenGame" style="flex:1; background: #8b0000;">⏹️ СТОП</button>
             </div>
             <div class="status" id="ravenStatus">⚡ Нажми СТАРТ, чтобы начать ловить ворон!</div>
-            <div class="status" style="margin-top: 10px;">💡 Бонус: каждые 5 ворон подряд = x2 монеты! Золотая ворона даёт +50 монет!</div>
         </div>
     </div>
 
@@ -524,10 +483,9 @@
             <div id="catPawContainer" class="game-container catpaw-container"></div>
             <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button id="startPawGame" class="btn-gold" style="flex:1">🐾 СТАРТ КОТОЛАПУ</button>
-                <button id="stopPawGame" style="flex:1; background: #8b0000;">⏹️ СТОП ИГРУ</button>
+                <button id="stopPawGame" style="flex:1; background: #8b0000;">⏹️ СТОП</button>
             </div>
-            <div class="status" id="pawStatus">😺 Нажми СТАРТ, лапки будут появляться и исчезать — бей быстрее!</div>
-            <div class="status" style="margin-top: 10px;">💡 Золотая лапа даёт +25 монет! Лапка живёт 1.5 секунды. Чем выше стрик, тем больше бонус!</div>
+            <div class="status" id="pawStatus">😺 Нажми СТАРТ, лапки будут появляться!</div>
         </div>
     </div>
 
@@ -538,29 +496,27 @@
             <div id="adminLockBlock">
                 <div class="flex-row">
                     <input type="password" id="adminPasswordInput" placeholder="Пароль админа">
-                    <button id="unlockAdminBtn" class="btn-gold">🔓 Войти в админку</button>
+                    <button id="unlockAdminBtn" class="btn-gold">🔓 Войти</button>
                 </div>
             </div>
             <div id="adminContent" style="display:none;">
-                <div class="status" style="margin-bottom: 15px; background: #2eff9e22;">🟢 Режим администратора активен</div>
-                <h3>🟢 Онлайн сейчас <span id="onlineCount" class="online-count">0</span></h3>
-                <div id="onlineUsersList" class="status" style="margin-bottom: 20px;"></div>
-                <h3>📋 Все пользователи (с паролями)</h3>
+                <div class="status" style="margin-bottom: 15px;">🟢 Режим администратора активен</div>
+                <h3>🟢 Онлайн: <span id="onlineCount">0</span></h3>
+                <div id="onlineUsersList" class="status"></div>
+                <h3>📋 Все пользователи</h3>
                 <div style="overflow-x: auto;">
-                    <table class="users-table" id="usersTable">
-                        <thead><tr><th>Никнейм</th><th>Пароль</th><th>Монеты</th><th>Карты</th><th>Статус</th></tr></thead>
+                    <table class="users-table">
+                        <thead><tr><th>Никнейм</th><th>Монеты</th><th>Карты</th><th>Статус</th></tr></thead>
                         <tbody id="usersTableBody"></tbody>
                     </table>
                 </div>
-                <h3 style="margin-top: 20px;">💰 Управление</h3>
-                <div class="flex-row">
+                <div class="flex-row" style="margin-top: 20px;">
                     <input type="text" id="adminUser" placeholder="username">
                     <input type="number" id="adminCoins" placeholder="монеты">
-                    <button id="adminSetCoinsBtn" class="btn-gold">💰 Выдать монеты</button>
-                    <button id="adminGiveCardBtn" class="btn-gold">💎 Дать все карты</button>
-                    <button id="adminResetGameBtn">⚠️ Сброс данных</button>
+                    <button id="adminSetCoinsBtn" class="btn-gold">💰 Выдать</button>
+                    <button id="adminGiveCardBtn" class="btn-gold">💎 Все карты</button>
+                    <button id="adminResetGameBtn">⚠️ Сброс</button>
                 </div>
-                <div id="adminMessage" class="status"></div>
             </div>
         </div>
     </div>
@@ -568,17 +524,11 @@
     <!-- Вкладка с соцсетями -->
     <div id="socialTab" class="tab-content">
         <div class="card">
-            <h2>📱 СОЦИАЛЬНЫЕ СЕТИ ПРОЕКТА</h2>
+            <h2>📱 СОЦИАЛЬНЫЕ СЕТИ</h2>
             <div class="social-links">
                 <div class="social-card">
-                    <a href="https://t.me/Dimochkagame" target="_blank">
-                        <span>📱</span>
-                        <span>Telegram канал</span>
-                    </a>
-                    <p style="margin-top: 15px; color: #aaa;">Новости, обновления, розыгрыши и общение</p>
-                    <a href="https://t.me/Dimochkagame" target="_blank">
-                        <button class="join-btn btn-gold">🔗 ПОДПИСАТЬСЯ</button>
-                    </a>
+                    <a href="https://t.me/Dimochkagame" target="_blank">📱 Telegram канал</a>
+                    <a href="https://t.me/Dimochkagame" target="_blank"><button class="join-btn btn-gold">🔗 ПОДПИСАТЬСЯ</button></a>
                 </div>
             </div>
         </div>
@@ -589,17 +539,14 @@
     const ADMIN_PASSWORD = "artem2024";
     let currentUser = null;
     let gameActive = false;
-    let clickPower = 1;
+    let autoInterval = null;
     let isAdminUnlocked = false;
     let activeUsers = new Map();
-    let autoInterval = null;
-
-    // Игра вороны
+    
+    // Игры
     let ravenGameActive = false, ravenScore = 0, combo = 0, ravenInterval = null, fallIntervals = [];
-    // Игра Котолапа
     let pawGameActive = false, pawScore = 0, pawStreak = 0, pawInterval = null, pawTimeouts = [];
 
-    // УЛУЧШЕНИЯ
     const upgrades = [
         { id: "power1", name: "🐾 Лапа +1", price: 150, bonus: 1 },
         { id: "power2", name: "🦷 Клык +3", price: 400, bonus: 3 },
@@ -610,12 +557,12 @@
     ];
 
     const allCards = [
-        { id: "cardArtem", name: "Artem OG", emoji:"🐹", price:500 },
-        { id: "cardGold", name: "Золотой Хомяк", emoji:"🏆", price:1200 },
-        { id: "cardLucky", name: "Удачливый", emoji:"🍀", price:800 },
-        { id: "cardGamer", name: "Геймер", emoji:"🎮", price:1000 },
-        { id: "cardKing", name: "Король клика", emoji:"👑", price:2000 },
-        { id: "cardCasino", name: "Казино-мастер", emoji:"🎰", price:1500 }
+        { id: "cardArtem", name: "Artem OG", emoji: "🐹", price: 500 },
+        { id: "cardGold", name: "Золотой Хомяк", emoji: "🏆", price: 1200 },
+        { id: "cardLucky", name: "Удачливый", emoji: "🍀", price: 800 },
+        { id: "cardGamer", name: "Геймер", emoji: "🎮", price: 1000 },
+        { id: "cardKing", name: "Король клика", emoji: "👑", price: 2000 },
+        { id: "cardCasino", name: "Казино-мастер", emoji: "🎰", price: 1500 }
     ];
 
     function showToast(msg) {
@@ -634,21 +581,8 @@
         setTimeout(() => t.remove(), 2000);
     }
 
-    function showComboEffect(containerId, x, y, text) {
-        const container = document.getElementById(containerId);
-        if(!container) return;
-        const effect = document.createElement('div');
-        effect.className = 'combo-effect';
-        effect.textContent = text;
-        effect.style.left = x + 'px';
-        effect.style.top = y + 'px';
-        container.appendChild(effect);
-        setTimeout(() => effect.remove(), 600);
-    }
-
     function saveUser() {
         if (currentUser) {
-            currentUser.password = currentUser.username;
             localStorage.setItem(`user_${currentUser.username}`, JSON.stringify(currentUser));
         }
     }
@@ -662,21 +596,23 @@
                 cardsOwned: data.cardsOwned || [], 
                 upgrades: data.upgrades || [], 
                 clickBonus: data.clickBonus || 1, 
-                autoPerSec: data.autoPerSec || 0,
-                password: data.password || username 
+                autoPerSec: data.autoPerSec || 0
             };
         }
         return null;
     }
     
-    function createUser(username) {
-        return { username, password: username, coins: 1600, cardsOwned: [], upgrades: [], clickBonus: 1, autoPerSec: 0 };
-    }
-    
     function registerUser(username) {
         if (!username.trim()) return false;
         if (localStorage.getItem(`user_${username}`)) return false;
-        currentUser = createUser(username);
+        currentUser = { 
+            username: username, 
+            coins: 1600, 
+            cardsOwned: [], 
+            upgrades: [], 
+            clickBonus: 1, 
+            autoPerSec: 0 
+        };
         localStorage.setItem(`user_${username}`, JSON.stringify(currentUser));
         syncUI();
         return true;
@@ -687,7 +623,6 @@
         if (data) {
             currentUser = data;
             syncUI();
-            updateOnlineStatus();
             return true;
         }
         return false;
@@ -697,105 +632,120 @@
         if (!currentUser) {
             document.getElementById("artemCoinsDisplay").innerText = "0";
             document.getElementById("userNameSpan").innerHTML = "Гость";
-            renderShop();
-            renderAuto();
-            renderCards();
+            document.getElementById("shopContainer").innerHTML = '<div class="status">🔒 Войдите в аккаунт</div>';
+            document.getElementById("autoContainer").innerHTML = '<div class="status">🔒 Войдите в аккаунт</div>';
+            document.getElementById("nftCollection").innerHTML = '<div class="status">🔒 Войдите в аккаунт</div>';
             return;
         }
+        
         document.getElementById("artemCoinsDisplay").innerText = Math.floor(currentUser.coins);
         document.getElementById("userNameSpan").innerHTML = `👤 ${currentUser.username}`;
-        clickPower = currentUser.clickBonus;
-        renderShop();
-        renderAuto();
-        renderCards();
-        saveUser();
         
-        if (autoInterval) clearInterval(autoInterval);
-        autoInterval = setInterval(() => {
-            if (currentUser && currentUser.autoPerSec > 0) {
-                currentUser.coins += currentUser.autoPerSec;
-                if (currentUser.coins < 0) currentUser.coins = 0;
-                document.getElementById("artemCoinsDisplay").innerText = Math.floor(currentUser.coins);
-                saveUser();
-            }
-        }, 1000);
-        updateOnlineStatus();
-    }
-    
-    function renderShop() {
-        let container = document.getElementById("shopContainer");
-        if (!currentUser) { container.innerHTML = `<div class="status">🔒 Войдите</div>`; return; }
-        container.innerHTML = "";
-        upgrades.forEach(item => {
+        // Рендер улучшений
+        let shopHtml = '';
+        for (let item of upgrades) {
             let owned = (currentUser.upgrades || []).includes(item.id);
-            let div = document.createElement("div");
-            div.className = "shop-row";
-            div.innerHTML = `<span><strong>${item.name}</strong> — ${item.price}🪙</span><button ${owned ? 'disabled' : ''} class="${owned ? '' : 'btn-gold'}">${owned ? '✅ Куплено' : 'Купить'}</button>`;
-            if (!owned) {
-                div.querySelector("button").addEventListener("click", () => {
-                    if (currentUser.coins >= item.price) {
-                        currentUser.coins -= item.price;
+            shopHtml += `
+                <div class="shop-row">
+                    <span><strong>${item.name}</strong> — ${item.price}🪙</span>
+                    <button class="${owned ? '' : 'btn-gold'}" data-upgrade="${item.id}" data-price="${item.price}" data-bonus="${item.bonus}" ${owned ? 'disabled' : ''}>${owned ? '✅ Куплено' : 'Купить'}</button>
+                </div>
+            `;
+        }
+        document.getElementById("shopContainer").innerHTML = shopHtml;
+        
+        // Добавляем обработчики для улучшений
+        document.querySelectorAll('[data-upgrade]').forEach(btn => {
+            if (!btn.disabled) {
+                btn.addEventListener('click', (e) => {
+                    let upgradeId = btn.dataset.upgrade;
+                    let price = parseInt(btn.dataset.price);
+                    let bonus = parseInt(btn.dataset.bonus);
+                    if (currentUser.coins >= price) {
+                        currentUser.coins -= price;
                         if (!currentUser.upgrades) currentUser.upgrades = [];
-                        currentUser.upgrades.push(item.id);
-                        currentUser.clickBonus = (currentUser.clickBonus || 1) + item.bonus;
+                        currentUser.upgrades.push(upgradeId);
+                        currentUser.clickBonus = (currentUser.clickBonus || 1) + bonus;
                         syncUI();
-                        showToast(`✅ Куплено: ${item.name}`);
-                    } else showToast("❌ Не хватает монет");
+                        showToast(`✅ Куплено: ${upgradeId}`);
+                    } else {
+                        showToast("❌ Не хватает монет");
+                    }
                 });
             }
-            container.appendChild(div);
         });
-    }
-    
-    function renderAuto() {
-        let container = document.getElementById("autoContainer");
-        if (!currentUser) { container.innerHTML = `<div class="status">🔒 Войдите</div>`; return; }
-        container.innerHTML = "";
+        
+        // Автокликер
         let hasAuto = (currentUser.upgrades || []).includes("auto");
-        let div = document.createElement("div");
-        div.className = "shop-row";
-        let currentLvl = currentUser.autoPerSec || 0;
-        div.innerHTML = `<span><strong>🤖 АВТОКЛИКЕР</strong><br><span style="font-size:12px;">+1 мон/сек | Сейчас: +${currentLvl} мон/сек</span></span>
-                         <button ${hasAuto ? 'disabled' : ''} class="${hasAuto ? '' : 'btn-gold'}">${hasAuto ? '✅ Куплен' : 'Купить за 100000'}</button>`;
-        if (!hasAuto) {
-            div.querySelector("button").addEventListener("click", () => {
+        document.getElementById("autoContainer").innerHTML = `
+            <div class="shop-row">
+                <span><strong>🤖 АВТОКЛИКЕР</strong><br><span style="font-size:12px;">Сейчас: +${currentUser.autoPerSec || 0} мон/сек</span></span>
+                <button class="${hasAuto ? '' : 'btn-gold'}" id="buyAutoBtn" ${hasAuto ? 'disabled' : ''}>${hasAuto ? '✅ Куплен' : 'Купить за 100000'}</button>
+            </div>
+        `;
+        
+        let buyAutoBtn = document.getElementById("buyAutoBtn");
+        if (buyAutoBtn && !hasAuto) {
+            buyAutoBtn.addEventListener('click', () => {
                 if (currentUser.coins >= 100000) {
                     currentUser.coins -= 100000;
                     if (!currentUser.upgrades) currentUser.upgrades = [];
                     currentUser.upgrades.push("auto");
                     currentUser.autoPerSec = (currentUser.autoPerSec || 0) + 1;
                     syncUI();
-                    showToast("🤖 Автокликер активирован! +1 мон/сек");
-                } else showToast("❌ Нужно 100000 монет");
+                    showToast("🤖 Автокликер активирован!");
+                } else {
+                    showToast("❌ Нужно 100000 монет");
+                }
             });
         }
-        container.appendChild(div);
-    }
-    
-    function renderCards() {
-        let container = document.getElementById("nftCollection");
-        if (!currentUser) { container.innerHTML = `<div class="status">🔓 Войдите</div>`; return; }
-        container.innerHTML = "";
-        allCards.forEach(card => {
-            let owned = currentUser.cardsOwned.includes(card.id);
-            let cd = document.createElement("div");
-            cd.className = `nft-card ${owned ? 'owned' : ''}`;
-            cd.innerHTML = `<div style="font-size:36px">${card.emoji}</div><div>${card.name}</div><div style="font-size:10px">${owned ? '✔️ Владелец' : card.price + '🪙'}</div>`;
-            if (!owned) {
-                cd.style.cursor = "pointer";
-                cd.addEventListener("click", () => {
-                    if (currentUser.coins >= card.price) {
-                        currentUser.coins -= card.price;
-                        currentUser.cardsOwned.push(card.id);
-                        syncUI();
-                        showToast(`🎉 Получена карта: ${card.name}`);
-                    } else showToast("❌ Монет не хватает");
-                });
-            }
-            container.appendChild(cd);
+        
+        // Карты
+        let cardsHtml = '';
+        for (let card of allCards) {
+            let owned = (currentUser.cardsOwned || []).includes(card.id);
+            cardsHtml += `
+                <div class="nft-card ${owned ? 'owned' : ''}" data-card="${card.id}" data-price="${card.price}" style="${owned ? '' : 'cursor:pointer'}">
+                    <div style="font-size:36px">${card.emoji}</div>
+                    <div>${card.name}</div>
+                    <div style="font-size:10px">${owned ? '✔️ Владелец' : card.price + '🪙'}</div>
+                </div>
+            `;
+        }
+        document.getElementById("nftCollection").innerHTML = cardsHtml;
+        
+        // Добавляем обработчики для карт
+        document.querySelectorAll('.nft-card:not(.owned)').forEach(cardDiv => {
+            cardDiv.addEventListener('click', () => {
+                let cardId = cardDiv.dataset.card;
+                let price = parseInt(cardDiv.dataset.price);
+                let card = allCards.find(c => c.id === cardId);
+                if (currentUser.coins >= price) {
+                    currentUser.coins -= price;
+                    if (!currentUser.cardsOwned) currentUser.cardsOwned = [];
+                    currentUser.cardsOwned.push(cardId);
+                    syncUI();
+                    showToast(`🎉 Получена карта: ${card.name}`);
+                } else {
+                    showToast("❌ Монет не хватает");
+                }
+            });
         });
+        
+        saveUser();
+        
+        // Автокликер тикер
+        if (autoInterval) clearInterval(autoInterval);
+        autoInterval = setInterval(() => {
+            if (currentUser && currentUser.autoPerSec > 0) {
+                currentUser.coins += currentUser.autoPerSec;
+                document.getElementById("artemCoinsDisplay").innerText = Math.floor(currentUser.coins);
+                saveUser();
+            }
+        }, 1000);
     }
     
+    // Хомяки
     function initClicker() {
         let grid = document.getElementById("clickerGrid");
         grid.innerHTML = "";
@@ -803,14 +753,14 @@
             let btn = document.createElement("div");
             btn.className = "clicker-btn";
             btn.innerHTML = "🐹";
-            btn.addEventListener("click", (e) => {
-                e.stopPropagation();
+            btn.onclick = () => {
                 if (!currentUser) { showToast("🔐 Войдите в аккаунт"); return; }
-                currentUser.coins += clickPower;
-                syncUI();
+                currentUser.coins += currentUser.clickBonus;
+                document.getElementById("artemCoinsDisplay").innerText = Math.floor(currentUser.coins);
+                saveUser();
                 btn.style.transform = "scale(0.95)";
                 setTimeout(() => btn.style.transform = "", 100);
-            });
+            };
             grid.appendChild(btn);
         }
     }
@@ -820,7 +770,7 @@
         if (gameActive) return;
         gameActive = true;
         let clicks = 0, timeLeft = 30;
-        const statusDiv = document.getElementById("gameTimerStatus");
+        let statusDiv = document.getElementById("gameTimerStatus");
         statusDiv.innerHTML = "⏳ 30 СЕКУНД — КЛИКАЙ!";
         
         let timer = setInterval(() => {
@@ -843,168 +793,150 @@
         };
         document.addEventListener("click", clickHandler);
         
-        setTimeout(() => { 
-            gameActive = false; 
-            document.removeEventListener("click", clickHandler);
-        }, 30000);
+        setTimeout(() => { gameActive = false; document.removeEventListener("click", clickHandler); }, 30000);
     }
     
-    function casinoCoinFlip(bet) {
+    // Казино
+    function casinoCoinFlip() {
         if (!currentUser) return "🔒 Войдите";
+        let bet = parseInt(document.getElementById("betAmount").value) || 100;
         if (currentUser.coins < bet) return "❌ Не хватает монет";
         let win = Math.random() < 0.45;
         if (win) {
             currentUser.coins += bet;
             syncUI();
-            return `🪙 ОРЁЛ! +${bet} монет (45%)`;
+            return `🪙 ОРЁЛ! +${bet} монет`;
         } else {
             currentUser.coins -= bet;
             syncUI();
-            return `🪙 РЕШКА! -${bet} монет (55%)`;
+            return `🪙 РЕШКА! -${bet} монет`;
         }
     }
     
-    function casinoDice(bet) {
+    function casinoDice() {
         if (!currentUser) return "🔒 Войдите";
+        let bet = parseInt(document.getElementById("betAmount").value) || 100;
         if (currentUser.coins < bet) return "❌ Не хватает монет";
         let d = Math.floor(Math.random() * 6) + 1;
         if (d >= 5) {
             let win = bet * 2;
             currentUser.coins += win;
             syncUI();
-            return `🎲 ${d}! ВЫИГРЫШ x2 +${win} монет (33%)`;
+            return `🎲 ${d}! ВЫИГРЫШ +${win} монет`;
         } else {
             currentUser.coins -= bet;
             syncUI();
-            return `🎲 ${d} Проигрыш -${bet} монет (67%)`;
+            return `🎲 ${d} Проигрыш -${bet} монет`;
         }
     }
     
-    // ЛОВЛЯ ВОРОН
-    function catchRaven(element, isGolden = false) {
+    // Ловля ворон
+    function catchRaven(element, isGolden) {
         if (!currentUser || !ravenGameActive) return;
         let reward = isGolden ? 50 : 10;
         combo++;
-        let comboBonus = 1;
-        if (combo >= 5 && combo < 10) comboBonus = 2;
-        else if (combo >= 10) comboBonus = 3;
-        let totalReward = reward * comboBonus;
-        currentUser.coins += totalReward;
+        let comboBonus = (combo >= 10) ? 3 : (combo >= 5) ? 2 : 1;
+        let total = reward * comboBonus;
+        currentUser.coins += total;
         ravenScore++;
-        const rect = element.getBoundingClientRect();
-        const containerRect = document.getElementById('ravenGameContainer').getBoundingClientRect();
-        showComboEffect('ravenGameContainer', rect.left - containerRect.left, rect.top - containerRect.top, `${isGolden ? '🌟 ЗОЛОТАЯ! ' : '🦆 '}+${totalReward} 🪙`);
         element.remove();
         syncUI();
         document.getElementById('ravenScore').innerText = ravenScore;
         document.getElementById('comboCount').innerText = combo;
-        if (combo === 5) showToast("🔥 КОМБО x2! Вороны дают вдвое!");
-        if (combo === 10) showToast("💥 МЕГА КОМБО x3!");
+        showToast(`${isGolden ? '🌟' : '🦆'} +${total} монет! Комбо x${comboBonus}`);
     }
-
+    
     function createRaven() {
         if (!ravenGameActive) return;
-        const container = document.getElementById('ravenGameContainer');
-        if (!container) return;
-        const raven = document.createElement('div');
+        let container = document.getElementById('ravenGameContainer');
+        let raven = document.createElement('div');
         raven.className = 'falling-item';
-        const isGolden = Math.random() < 0.1;
+        let isGolden = Math.random() < 0.1;
         raven.innerHTML = isGolden ? '🌟🦆🌟' : '🦆';
-        raven.style.fontSize = isGolden ? '56px' : '48px';
         raven.style.left = Math.random() * (container.clientWidth - 60) + 'px';
         raven.style.top = '0px';
-        raven.addEventListener('click', (e) => { e.stopPropagation(); catchRaven(raven, isGolden); });
+        raven.onclick = (e) => { e.stopPropagation(); catchRaven(raven, isGolden); };
         container.appendChild(raven);
         let pos = 0;
-        const speed = 2 + Math.random() * 3;
-        const fallInterval = setInterval(() => {
-            if (!ravenGameActive || !raven.parentNode) { clearInterval(fallInterval); if(raven.parentNode) raven.remove(); return; }
+        let speed = 2 + Math.random() * 3;
+        let interval = setInterval(() => {
+            if (!ravenGameActive || !raven.parentNode) { clearInterval(interval); if(raven.parentNode) raven.remove(); return; }
             pos += speed;
             raven.style.top = pos + 'px';
             if (pos >= container.clientHeight - 60) {
-                clearInterval(fallInterval);
+                clearInterval(interval);
                 if(raven.parentNode) raven.remove();
                 combo = 0;
                 document.getElementById('comboCount').innerText = combo;
             }
         }, 20);
-        fallIntervals.push(fallInterval);
+        fallIntervals.push(interval);
     }
     
-    function startRavenGame() { 
-        if(!currentUser){ showToast("🔐 Сначала войдите в аккаунт!"); return; } 
-        if(ravenGameActive) return; 
-        ravenGameActive=true; 
-        ravenScore=0; 
-        combo=0; 
-        document.getElementById('ravenScore').innerText='0'; 
-        document.getElementById('comboCount').innerText='0'; 
-        document.getElementById('ravenStatus').innerHTML='🦆 ИГРА АКТИВНА! Лови ворон!';
-        document.getElementById('ravenGameContainer').innerHTML=''; 
+    function startRavenGame() {
+        if (!currentUser) { showToast("Войдите в аккаунт"); return; }
+        if (ravenGameActive) return;
+        ravenGameActive = true;
+        ravenScore = 0;
+        combo = 0;
+        document.getElementById('ravenScore').innerText = '0';
+        document.getElementById('comboCount').innerText = '0';
+        document.getElementById('ravenGameContainer').innerHTML = '';
+        document.getElementById('ravenStatus').innerHTML = '🦆 ИГРА АКТИВНА!';
+        ravenInterval = setInterval(() => { if(ravenGameActive) createRaven(); }, 800);
+    }
+    
+    function stopRavenGame() {
+        ravenGameActive = false;
         if(ravenInterval) clearInterval(ravenInterval);
-        ravenInterval = setInterval(()=>{if(ravenGameActive) createRaven();}, 800); 
+        fallIntervals.forEach(i => clearInterval(i));
+        fallIntervals = [];
+        document.getElementById('ravenGameContainer').innerHTML = '';
+        document.getElementById('ravenStatus').innerHTML = '⚡ Игра остановлена';
     }
     
-    function stopRavenGame() { 
-        ravenGameActive=false; 
-        if(ravenInterval) clearInterval(ravenInterval); 
-        fallIntervals.forEach(i=>clearInterval(i)); 
-        fallIntervals=[]; 
-        document.getElementById('ravenGameContainer').innerHTML=''; 
-        document.getElementById('ravenStatus').innerHTML='⚡ Игра остановлена.'; 
-    }
-    
-    // КОТОЛАПА
-    function catchPaw(element, isGolden = false) {
+    // Котолапа
+    function catchPaw(element, isGolden) {
         if (!currentUser || !pawGameActive) return;
-        let baseReward = isGolden ? 25 : 5;
+        let base = isGolden ? 25 : 5;
         let streakBonus = 1 + Math.floor(pawStreak / 10);
         if (streakBonus > 5) streakBonus = 5;
-        let totalReward = baseReward * streakBonus;
-        currentUser.coins += totalReward;
+        let total = base * streakBonus;
+        currentUser.coins += total;
         pawScore++;
         pawStreak++;
-        const rect = element.getBoundingClientRect();
-        const containerRect = document.getElementById('catPawContainer').getBoundingClientRect();
-        showComboEffect('catPawContainer', rect.left - containerRect.left, rect.top - containerRect.top, `${isGolden ? '🌟ЗОЛОТАЯ ЛАПА🌟' : '🐾ЛАПА!'} +${totalReward} 🪙 (x${streakBonus})`);
         element.remove();
         syncUI();
         document.getElementById('pawScore').innerText = pawScore;
         document.getElementById('pawStreak').innerText = pawStreak;
-        if(pawStreak % 10 === 0) showToast(`🎉 СТРИК ${pawStreak}! Бонус увеличился!`);
+        showToast(`${isGolden ? '🌟' : '🐾'} +${total} монет! Стрик x${streakBonus}`);
     }
-
+    
     function spawnPaw() {
         if (!pawGameActive) return;
-        const container = document.getElementById('catPawContainer');
-        if (!container) return;
-        const paw = document.createElement('div');
+        let container = document.getElementById('catPawContainer');
+        let paw = document.createElement('div');
         paw.className = 'falling-item';
-        const isGolden = Math.random() < 0.12;
+        let isGolden = Math.random() < 0.12;
         paw.innerHTML = isGolden ? '🌟🐾🌟' : '🐾';
-        paw.style.fontSize = isGolden ? '58px' : '52px';
         paw.style.left = Math.random() * (container.clientWidth - 70) + 'px';
         paw.style.top = Math.random() * (container.clientHeight - 80) + 'px';
-        paw.style.cursor = 'pointer';
-        paw.addEventListener('click', (e) => { e.stopPropagation(); catchPaw(paw, isGolden); });
+        paw.onclick = (e) => { e.stopPropagation(); catchPaw(paw, isGolden); };
         container.appendChild(paw);
-        const timeout = setTimeout(() => {
-            if(paw.parentNode) paw.remove();
-        }, 1500);
+        let timeout = setTimeout(() => { if(paw.parentNode) paw.remove(); }, 1500);
         pawTimeouts.push(timeout);
     }
-
+    
     function startPawGame() {
-        if(!currentUser){ showToast("🔐 Сначала войдите в аккаунт!"); return; }
-        if(pawGameActive) return;
+        if (!currentUser) { showToast("Войдите в аккаунт"); return; }
+        if (pawGameActive) return;
         pawGameActive = true;
         pawScore = 0;
         pawStreak = 0;
         document.getElementById('pawScore').innerText = '0';
         document.getElementById('pawStreak').innerText = '0';
-        document.getElementById('pawStatus').innerHTML = '🐱 ЛАПКИ ПОЯВЛЯЮТСЯ! ЖМИ БЫСТРО!';
         document.getElementById('catPawContainer').innerHTML = '';
-        if(pawInterval) clearInterval(pawInterval);
+        document.getElementById('pawStatus').innerHTML = '🐱 ЛАПКИ ПОЯВЛЯЮТСЯ!';
         pawInterval = setInterval(() => { if(pawGameActive) spawnPaw(); }, 1000);
     }
     
@@ -1014,154 +946,123 @@
         pawTimeouts.forEach(t => clearTimeout(t));
         pawTimeouts = [];
         document.getElementById('catPawContainer').innerHTML = '';
-        document.getElementById('pawStatus').innerHTML = '⏸ Игра остановлена. Нажми СТАРТ для новой игры.';
+        document.getElementById('pawStatus').innerHTML = '⏸ Игра остановлена';
     }
     
-    // АДМИНКА
-    function updateOnlineStatus() { 
-        if(currentUser) activeUsers.set(currentUser.username, Date.now()); 
-        const now=Date.now(); 
-        for(let [u,time] of activeUsers) if(now-time>30000) activeUsers.delete(u); 
-        if(isAdminUnlocked && document.getElementById("adminContent").style.display!=="none"){ 
-            document.getElementById("onlineCount").innerText=activeUsers.size; 
-            document.getElementById("onlineUsersList").innerHTML=activeUsers.size===0?"🔴 Нет активных пользователей":Array.from(activeUsers.keys()).map(u=>`🟢 ${u}`).join(", "); 
-            renderUsersTable(); 
-        } 
-    }
-    
-    function getAllUsers() { 
-        let users=[]; 
-        for(let i=0;i<localStorage.length;i++){ 
-            let k=localStorage.key(i); 
-            if(k && k.startsWith("user_")) try{ 
-                let d=JSON.parse(localStorage.getItem(k)); 
-                if(d && d.username) users.push(d); 
-            }catch(e){}
-        } 
-        return users; 
-    }
-    
-    function renderUsersTable() { 
-        let users=getAllUsers(); 
-        users.sort((a,b)=>(b.coins||0)-(a.coins||0)); 
-        let tbody=document.getElementById("usersTableBody"); 
-        tbody.innerHTML=""; 
-        users.forEach(user=>{ 
-            let isOnline=activeUsers.has(user.username); 
-            let row=tbody.insertRow(); 
-            row.innerHTML=`<td>${user.username}</td><td style="color:#ffcc88;">${user.password || user.username}</td><td>💰 ${Math.floor(user.coins || 0)}</td><td>🎴 ${(user.cardsOwned || []).length}/${allCards.length}</td><td>${isOnline?'<span class="online-badge"></span> Онлайн':'⚫ Офлайн'}</td>`;
-        });
-        if(users.length===0) tbody.innerHTML="<tr><td colspan='5'>Нет зарегистрированных пользователей</td></tr>";
-    }
-    
-    function unlockAdmin(password) {
-        if (password === ADMIN_PASSWORD) {
-            isAdminUnlocked = true;
-            document.getElementById("adminContent").style.display = "block";
-            document.getElementById("adminLockBlock").style.display = "none";
-            showToast("✅ Доступ к админ-панели получен!");
-            updateOnlineStatus();
-            setInterval(updateOnlineStatus, 5000);
-            return true;
-        } else {
-            showToast("❌ Неверный пароль!");
-            return false;
+    // Админка
+    function updateOnlineStatus() {
+        if(currentUser) activeUsers.set(currentUser.username, Date.now());
+        let now = Date.now();
+        for(let [u, time] of activeUsers) if(now - time > 30000) activeUsers.delete(u);
+        if(isAdminUnlocked && document.getElementById("adminContent").style.display !== "none") {
+            document.getElementById("onlineCount").innerText = activeUsers.size;
+            document.getElementById("onlineUsersList").innerHTML = activeUsers.size === 0 ? "🔴 Нет активных" : Array.from(activeUsers.keys()).map(u => `🟢 ${u}`).join(", ");
+            let users = [];
+            for(let i = 0; i < localStorage.length; i++) {
+                let key = localStorage.key(i);
+                if(key && key.startsWith("user_")) {
+                    try {
+                        let d = JSON.parse(localStorage.getItem(key));
+                        if(d && d.username) users.push(d);
+                    } catch(e) {}
+                }
+            }
+            let tbody = document.getElementById("usersTableBody");
+            tbody.innerHTML = "";
+            users.forEach(user => {
+                let isOnline = activeUsers.has(user.username);
+                let row = tbody.insertRow();
+                row.innerHTML = `<td>${user.username}</td><td>💰 ${Math.floor(user.coins || 0)}</td><td>🎴 ${(user.cardsOwned || []).length}/${allCards.length}</td><td>${isOnline ? '🟢 Онлайн' : '⚫ Офлайн'}</td>`;
+            });
         }
     }
     
-    // ========== ИНИЦИАЛИЗАЦИЯ ==========
+    function unlockAdmin() {
+        let pwd = document.getElementById("adminPasswordInput").value;
+        if(pwd === ADMIN_PASSWORD) {
+            isAdminUnlocked = true;
+            document.getElementById("adminContent").style.display = "block";
+            document.getElementById("adminLockBlock").style.display = "none";
+            showToast("✅ Админ-доступ получен!");
+            updateOnlineStatus();
+            setInterval(updateOnlineStatus, 5000);
+        } else {
+            showToast("❌ Неверный пароль!");
+        }
+    }
     
-    // Табы
+    // Инициализация событий
     document.querySelectorAll(".tab-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
             document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
             btn.classList.add("active");
             document.getElementById(btn.dataset.tab + "Tab").classList.add("active");
-            if (btn.dataset.tab === "admin" && isAdminUnlocked) updateOnlineStatus();
         });
     });
     
-    // Админ кнопки
-    document.getElementById("unlockAdminBtn").addEventListener("click", () => {
-        unlockAdmin(document.getElementById("adminPasswordInput").value);
-    });
+    document.getElementById("loginBtn").onclick = () => {
+        let n = prompt("Логин:");
+        if(n && loginUser(n)) showToast(`👋 Привет, ${n}!`);
+        else if(n) showToast("❌ Нет такого пользователя");
+    };
     
-    document.getElementById("adminSetCoinsBtn").addEventListener("click", () => {
-        if (!isAdminUnlocked) { showToast("❌ Админ-панель заблокирована!"); return; }
+    document.getElementById("registerBtn").onclick = () => {
+        let n = prompt("Новый логин:");
+        if(n && registerUser(n)) showToast(`✅ Аккаунт ${n} создан! +1600 монет`);
+        else if(n) showToast("❌ Имя занято");
+    };
+    
+    document.getElementById("playGameBtn").onclick = startGame30sec;
+    document.getElementById("coinFlipBtn").onclick = () => { document.getElementById("casinoResult").innerText = casinoCoinFlip(); };
+    document.getElementById("diceBtn").onclick = () => { document.getElementById("casinoResult").innerText = casinoDice(); };
+    document.getElementById("startRavenGame").onclick = startRavenGame;
+    document.getElementById("stopRavenGame").onclick = stopRavenGame;
+    document.getElementById("startPawGame").onclick = startPawGame;
+    document.getElementById("stopPawGame").onclick = stopPawGame;
+    document.getElementById("unlockAdminBtn").onclick = unlockAdmin;
+    document.getElementById("adminSetCoinsBtn").onclick = () => {
+        if(!isAdminUnlocked) { showToast("❌ Нет доступа"); return; }
         let name = document.getElementById("adminUser").value.trim();
         let val = parseInt(document.getElementById("adminCoins").value);
-        if (!name || isNaN(val)) { showToast("Введите имя и сумму"); return; }
+        if(!name || isNaN(val)) { showToast("Введите имя и сумму"); return; }
         let target = loadUser(name);
-        if (target) {
+        if(target) {
             target.coins += val;
             localStorage.setItem(`user_${name}`, JSON.stringify(target));
-            if (currentUser && currentUser.username === name) { currentUser.coins = target.coins; syncUI(); }
+            if(currentUser && currentUser.username === name) { currentUser.coins = target.coins; syncUI(); }
             showToast(`✅ ${name} +${val} монет`);
-            renderUsersTable();
+            updateOnlineStatus();
         } else showToast("❌ Пользователь не найден");
-    });
-    
-    document.getElementById("adminGiveCardBtn").addEventListener("click", () => {
-        if (!isAdminUnlocked) { showToast("❌ Админ-панель заблокирована!"); return; }
+    };
+    document.getElementById("adminGiveCardBtn").onclick = () => {
+        if(!isAdminUnlocked) { showToast("❌ Нет доступа"); return; }
         let name = document.getElementById("adminUser").value.trim();
-        if (!name) { showToast("Введите имя"); return; }
+        if(!name) { showToast("Введите имя"); return; }
         let target = loadUser(name);
-        if (target) {
+        if(target) {
             let allIds = allCards.map(c => c.id);
             target.cardsOwned = [...new Set([...target.cardsOwned, ...allIds])];
             localStorage.setItem(`user_${name}`, JSON.stringify(target));
-            if (currentUser && currentUser.username === name) { currentUser.cardsOwned = target.cardsOwned; syncUI(); }
+            if(currentUser && currentUser.username === name) { currentUser.cardsOwned = target.cardsOwned; syncUI(); }
             showToast(`💎 Все карты выданы ${name}`);
-            renderUsersTable();
+            updateOnlineStatus();
         } else showToast("❌ Нет пользователя");
-    });
-    
-    document.getElementById("adminResetGameBtn").addEventListener("click", () => {
-        if (!isAdminUnlocked) { showToast("❌ Админ-панель заблокирована!"); return; }
-        if (confirm("⚠️ Сбросить всех пользователей? Это действие необратимо!")) {
+    };
+    document.getElementById("adminResetGameBtn").onclick = () => {
+        if(!isAdminUnlocked) { showToast("❌ Нет доступа"); return; }
+        if(confirm("Сбросить всех пользователей?")) {
             localStorage.clear();
             currentUser = null;
             syncUI();
             showToast("✅ Все данные сброшены");
             location.reload();
         }
-    });
-    
-    // Кнопки игр
-    document.getElementById("startRavenGame").onclick = startRavenGame;
-    document.getElementById("stopRavenGame").onclick = stopRavenGame;
-    document.getElementById("startPawGame").onclick = startPawGame;
-    document.getElementById("stopPawGame").onclick = stopPawGame;
-    
-    // Авторизация
-    document.getElementById("loginBtn").onclick = () => {
-        let n = prompt("👤 Логин:");
-        if (n && loginUser(n)) showToast(`👋 Привет, ${n}!`);
-        else if (n) showToast("❌ Нет такого пользователя");
     };
     
-    document.getElementById("registerBtn").onclick = () => {
-        let n = prompt("🆕 Новый логин:");
-        if (n && registerUser(n)) showToast(`✅ Аккаунт ${n} создан +1600 монет!`);
-        else if (n) showToast("❌ Имя занято");
-    };
-    
-    // Игровые кнопки
-    document.getElementById("playGameBtn").onclick = startGame30sec;
-    document.getElementById("coinFlipBtn").onclick = () => {
-        let bet = parseInt(document.getElementById("betAmount").value) || 100;
-        document.getElementById("casinoResult").innerText = casinoCoinFlip(bet);
-    };
-    document.getElementById("diceBtn").onclick = () => {
-        let bet = parseInt(document.getElementById("betAmount").value) || 100;
-        document.getElementById("casinoResult").innerText = casinoDice(bet);
-    };
-    
-    // Запуск
     initClicker();
     syncUI();
-    setInterval(() => { if (currentUser) updateOnlineStatus(); }, 5000);
+    setInterval(() => { if(currentUser) updateOnlineStatus(); }, 5000);
 </script>
 </body>
 </html>
