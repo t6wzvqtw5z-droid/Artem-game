@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NFTArtem | Хомяки + Вороны + Котолапа</title>
+    <title>NFTArtem | Хомяки + Вороны + Котолапа + Топ игроков</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
             color: #fff;
             padding: 18px;
             position: relative;
-            overflow-x: hidden;
+            overflow-x: auto;
         }
 
         .app-container {
@@ -268,6 +268,8 @@
             padding: 10px 20px;
             border-radius: 30px;
             margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .game-stats {
@@ -278,22 +280,6 @@
         .game-stats span {
             color: #ffcc44;
             font-size: 1.5rem;
-        }
-
-        .combo-effect {
-            position: absolute;
-            font-size: 24px;
-            font-weight: bold;
-            color: gold;
-            text-shadow: 0 0 5px red;
-            pointer-events: none;
-            animation: floatUp 0.6s ease-out forwards;
-            z-index: 100;
-        }
-
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-50px); }
         }
 
         .users-table {
@@ -311,22 +297,6 @@
         .users-table th {
             background: #2eff9e33;
             color: #2eff9e;
-        }
-
-        .online-badge {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #2eff9e;
-            box-shadow: 0 0 5px #2eff9e;
-            margin-right: 8px;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.5; transform: scale(1); }
-            100% { opacity: 1; transform: scale(1.2); }
         }
 
         .flex-row {
@@ -393,6 +363,53 @@
             padding: 12px 30px;
             font-size: 1.2rem;
         }
+
+        .leaderboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .leaderboard-card {
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            padding: 15px;
+        }
+
+        .leaderboard-card h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: gold;
+        }
+        
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #2eff9e55;
+        }
+        
+        .leaderboard-table th {
+            color: #2eff9e;
+        }
+        
+        @media (max-width: 768px) {
+            .leaderboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .tabs .tab-btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+            .clicker-btn {
+                font-size: 40px;
+                padding: 12px 5px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -411,6 +428,7 @@
         <button class="tab-btn active" data-tab="game">🎮 Игра</button>
         <button class="tab-btn" data-tab="raven">🦆 Ловля ворон</button>
         <button class="tab-btn" data-tab="catpaw">🐾 Котолапа</button>
+        <button class="tab-btn" data-tab="leaderboard">🏆 ТОП ИГРОКОВ</button>
         <button class="tab-btn" data-tab="admin">👑 Админ панель</button>
         <button class="tab-btn" data-tab="social">📱 Соцсети</button>
     </div>
@@ -489,6 +507,24 @@
         </div>
     </div>
 
+    <!-- Вкладка ДОСКА ЛИДЕРОВ -->
+    <div id="leaderboardTab" class="tab-content">
+        <div class="card">
+            <h2>🏆 ТОП ИГРОКОВ (обновляется автоматически)</h2>
+            <div class="leaderboard-grid">
+                <div class="leaderboard-card">
+                    <h3>💰 БОГАТЕЙШИЕ</h3>
+                    <div id="topCoinsList" style="background: none; padding: 0;">Загрузка...</div>
+                </div>
+                <div class="leaderboard-card">
+                    <h3>🐹 ЛУЧШИЕ КЛИКЕРЫ</h3>
+                    <div id="topClicksList" style="background: none; padding: 0;">Загрузка...</div>
+                </div>
+            </div>
+            <div class="status" style="margin-top: 15px; text-align: center;">⭐ Топ рассчитывается на основе всех зарегистрированных игроков. Обновление каждые 10 секунд.</div>
+        </div>
+    </div>
+
     <!-- Вкладка с админ панелью -->
     <div id="adminTab" class="tab-content">
         <div class="card">
@@ -506,7 +542,7 @@
                 <h3>📋 Все пользователи</h3>
                 <div style="overflow-x: auto;">
                     <table class="users-table">
-                        <thead><tr><th>Никнейм</th><th>Монеты</th><th>Карты</th><th>Статус</th></tr></thead>
+                        <thead><tr><th>Никнейм</th><th>Монеты</th><th>Кликов</th><th>Карты</th><th>Статус</th></tr></thead>
                         <tbody id="usersTableBody"></tbody>
                     </table>
                 </div>
@@ -538,15 +574,16 @@
 <script>
     const ADMIN_PASSWORD = "artem2024";
     let currentUser = null;
-    let gameActive = false;
+    let gameActive30 = false;
     let autoInterval = null;
     let isAdminUnlocked = false;
     let activeUsers = new Map();
+    let comboTimeout = null; // для сброса комбо в ловле ворон
     
     // Игры
     let ravenGameActive = false, ravenScore = 0, combo = 0, ravenInterval = null, fallIntervals = [];
     let pawGameActive = false, pawScore = 0, pawStreak = 0, pawInterval = null, pawTimeouts = [];
-
+    
     const upgrades = [
         { id: "power1", name: "🐾 Лапа +1", price: 150, bonus: 1 },
         { id: "power2", name: "🦷 Клык +3", price: 400, bonus: 3 },
@@ -565,18 +602,19 @@
         { id: "cardCasino", name: "Казино-мастер", emoji: "🎰", price: 1500 }
     ];
 
-    function showToast(msg) {
+    function showToast(msg, isError = false) {
         let t = document.createElement("div");
         t.innerText = msg;
         t.style.position = "fixed";
         t.style.bottom = "20px";
         t.style.left = "20px";
-        t.style.background = "#000000cc";
-        t.style.color = "#2eff9e";
+        t.style.background = isError ? "#8b0000cc" : "#000000cc";
+        t.style.color = isError ? "#ffaaaa" : "#2eff9e";
         t.style.padding = "8px 16px";
         t.style.borderRadius = "40px";
         t.style.zIndex = "9999";
         t.style.fontWeight = "bold";
+        t.style.backdropFilter = "blur(5px)";
         document.body.appendChild(t);
         setTimeout(() => t.remove(), 2000);
     }
@@ -596,7 +634,8 @@
                 cardsOwned: data.cardsOwned || [], 
                 upgrades: data.upgrades || [], 
                 clickBonus: data.clickBonus || 1, 
-                autoPerSec: data.autoPerSec || 0
+                autoPerSec: data.autoPerSec || 0,
+                totalClicks: data.totalClicks || 0
             };
         }
         return null;
@@ -611,7 +650,8 @@
             cardsOwned: [], 
             upgrades: [], 
             clickBonus: 1, 
-            autoPerSec: 0 
+            autoPerSec: 0,
+            totalClicks: 0
         };
         localStorage.setItem(`user_${username}`, JSON.stringify(currentUser));
         syncUI();
@@ -628,6 +668,64 @@
         return false;
     }
     
+    function updateLeaderboard() {
+        let users = [];
+        for(let i = 0; i < localStorage.length; i++) {
+            let key = localStorage.key(i);
+            if(key && key.startsWith("user_")) {
+                try {
+                    let d = JSON.parse(localStorage.getItem(key));
+                    if(d && d.username) {
+                        users.push({
+                            name: d.username,
+                            coins: d.coins || 0,
+                            clicks: d.totalClicks || 0
+                        });
+                    }
+                } catch(e) {}
+            }
+        }
+        
+        let topCoins = [...users].sort((a,b) => b.coins - a.coins).slice(0, 10);
+        let topClicks = [...users].sort((a,b) => b.clicks - a.clicks).slice(0, 10);
+        
+        let coinsHtml = '<table class="leaderboard-table"><tr><th>#</th><th>Игрок</th><th>💰 Монет</th></tr>';
+        topCoins.forEach((u, idx) => {
+            coinsHtml += `<tr><td>${idx+1}</td><td>${u.name}</td><td>${Math.floor(u.coins).toLocaleString()}</td></tr>`;
+        });
+        coinsHtml += '</table>';
+        
+        let clicksHtml = '<table class="leaderboard-table"><tr><th>#</th><th>Игрок</th><th>🐹 Кликов</th></tr>';
+        topClicks.forEach((u, idx) => {
+            clicksHtml += `<tr><td>${idx+1}</td><td>${u.name}</td><td>${u.clicks.toLocaleString()}</td></tr>`;
+        });
+        clicksHtml += '</table>';
+        
+        let topCoinsDiv = document.getElementById("topCoinsList");
+        let topClicksDiv = document.getElementById("topClicksList");
+        if(topCoinsDiv) topCoinsDiv.innerHTML = coinsHtml;
+        if(topClicksDiv) topClicksDiv.innerHTML = clicksHtml;
+    }
+    
+    function addClickStat(amount = 1) {
+        if(currentUser) {
+            currentUser.totalClicks = (currentUser.totalClicks || 0) + amount;
+            saveUser();
+            updateLeaderboard();
+        }
+    }
+    
+    function addCoins(amount, addClicks = false, clickCount = 0) {
+        if(!currentUser) return;
+        currentUser.coins += amount;
+        if(addClicks && clickCount > 0) {
+            addClickStat(clickCount);
+        }
+        document.getElementById("artemCoinsDisplay").innerText = Math.floor(currentUser.coins);
+        saveUser();
+        updateLeaderboard();
+    }
+    
     function syncUI() {
         if (!currentUser) {
             document.getElementById("artemCoinsDisplay").innerText = "0";
@@ -635,6 +733,7 @@
             document.getElementById("shopContainer").innerHTML = '<div class="status">🔒 Войдите в аккаунт</div>';
             document.getElementById("autoContainer").innerHTML = '<div class="status">🔒 Войдите в аккаунт</div>';
             document.getElementById("nftCollection").innerHTML = '<div class="status">🔒 Войдите в аккаунт</div>';
+            updateLeaderboard();
             return;
         }
         
@@ -654,7 +753,6 @@
         }
         document.getElementById("shopContainer").innerHTML = shopHtml;
         
-        // Добавляем обработчики для улучшений
         document.querySelectorAll('[data-upgrade]').forEach(btn => {
             if (!btn.disabled) {
                 btn.addEventListener('click', (e) => {
@@ -669,7 +767,7 @@
                         syncUI();
                         showToast(`✅ Куплено: ${upgradeId}`);
                     } else {
-                        showToast("❌ Не хватает монет");
+                        showToast("❌ Не хватает монет", true);
                     }
                 });
             }
@@ -695,7 +793,7 @@
                     syncUI();
                     showToast("🤖 Автокликер активирован!");
                 } else {
-                    showToast("❌ Нужно 100000 монет");
+                    showToast("❌ Нужно 100000 монет", true);
                 }
             });
         }
@@ -714,7 +812,6 @@
         }
         document.getElementById("nftCollection").innerHTML = cardsHtml;
         
-        // Добавляем обработчики для карт
         document.querySelectorAll('.nft-card:not(.owned)').forEach(cardDiv => {
             cardDiv.addEventListener('click', () => {
                 let cardId = cardDiv.dataset.card;
@@ -727,25 +824,25 @@
                     syncUI();
                     showToast(`🎉 Получена карта: ${card.name}`);
                 } else {
-                    showToast("❌ Монет не хватает");
+                    showToast("❌ Монет не хватает", true);
                 }
             });
         });
         
         saveUser();
+        updateLeaderboard();
         
-        // Автокликер тикер
         if (autoInterval) clearInterval(autoInterval);
         autoInterval = setInterval(() => {
             if (currentUser && currentUser.autoPerSec > 0) {
                 currentUser.coins += currentUser.autoPerSec;
                 document.getElementById("artemCoinsDisplay").innerText = Math.floor(currentUser.coins);
                 saveUser();
+                updateLeaderboard();
             }
         }, 1000);
     }
     
-    // Хомяки
     function initClicker() {
         let grid = document.getElementById("clickerGrid");
         grid.innerHTML = "";
@@ -754,10 +851,12 @@
             btn.className = "clicker-btn";
             btn.innerHTML = "🐹";
             btn.onclick = () => {
-                if (!currentUser) { showToast("🔐 Войдите в аккаунт"); return; }
+                if (!currentUser) { showToast("🔐 Войдите в аккаунт", true); return; }
                 currentUser.coins += currentUser.clickBonus;
+                addClickStat(1);
                 document.getElementById("artemCoinsDisplay").innerText = Math.floor(currentUser.coins);
                 saveUser();
+                updateLeaderboard();
                 btn.style.transform = "scale(0.95)";
                 setTimeout(() => btn.style.transform = "", 100);
             };
@@ -766,49 +865,48 @@
     }
     
     function startGame30sec() {
-        if (!currentUser) { showToast("🔐 Нужен аккаунт"); return; }
-        if (gameActive) return;
-        gameActive = true;
+        if (!currentUser) { showToast("🔐 Нужен аккаунт", true); return; }
+        if (gameActive30) return;
+        gameActive30 = true;
         let clicks = 0, timeLeft = 30;
         let statusDiv = document.getElementById("gameTimerStatus");
         statusDiv.innerHTML = "⏳ 30 СЕКУНД — КЛИКАЙ!";
         
         let timer = setInterval(() => {
-            if (!gameActive) { clearInterval(timer); return; }
+            if (!gameActive30) { clearInterval(timer); return; }
             timeLeft--;
             statusDiv.innerHTML = `⏱️ ${timeLeft} сек | Кликов: ${clicks}`;
             if (timeLeft <= 0) {
                 clearInterval(timer);
-                gameActive = false;
+                gameActive30 = false;
                 let reward = clicks * 5;
-                currentUser.coins += reward;
-                syncUI();
+                addCoins(reward, true, clicks);
                 statusDiv.innerHTML = `✅ +${reward} монет (${clicks} кликов)`;
             }
         }, 1000);
         
         let clickHandler = (e) => {
-            if (!gameActive) { document.removeEventListener("click", clickHandler); return; }
-            if (e.target.closest('.clicker-btn')) clicks++;
+            if (!gameActive30) { document.removeEventListener("click", clickHandler); return; }
+            if (e.target.closest('.clicker-btn')) {
+                clicks++;
+                addClickStat(1);
+            }
         };
         document.addEventListener("click", clickHandler);
         
-        setTimeout(() => { gameActive = false; document.removeEventListener("click", clickHandler); }, 30000);
+        setTimeout(() => { gameActive30 = false; document.removeEventListener("click", clickHandler); }, 30000);
     }
     
-    // Казино
     function casinoCoinFlip() {
         if (!currentUser) return "🔒 Войдите";
         let bet = parseInt(document.getElementById("betAmount").value) || 100;
         if (currentUser.coins < bet) return "❌ Не хватает монет";
         let win = Math.random() < 0.45;
         if (win) {
-            currentUser.coins += bet;
-            syncUI();
+            addCoins(bet);
             return `🪙 ОРЁЛ! +${bet} монет`;
         } else {
-            currentUser.coins -= bet;
-            syncUI();
+            addCoins(-bet);
             return `🪙 РЕШКА! -${bet} монет`;
         }
     }
@@ -820,27 +918,32 @@
         let d = Math.floor(Math.random() * 6) + 1;
         if (d >= 5) {
             let win = bet * 2;
-            currentUser.coins += win;
-            syncUI();
+            addCoins(win);
             return `🎲 ${d}! ВЫИГРЫШ +${win} монет`;
         } else {
-            currentUser.coins -= bet;
-            syncUI();
+            addCoins(-bet);
             return `🎲 ${d} Проигрыш -${bet} монет`;
         }
     }
     
-    // Ловля ворон
+    function resetCombo() {
+        if(combo > 0) {
+            combo = 0;
+            document.getElementById('comboCount').innerText = combo;
+        }
+    }
+    
     function catchRaven(element, isGolden) {
         if (!currentUser || !ravenGameActive) return;
         let reward = isGolden ? 50 : 10;
         combo++;
+        if(comboTimeout) clearTimeout(comboTimeout);
+        comboTimeout = setTimeout(() => resetCombo(), 3000);
         let comboBonus = (combo >= 10) ? 3 : (combo >= 5) ? 2 : 1;
         let total = reward * comboBonus;
-        currentUser.coins += total;
+        addCoins(total, true, 1);
         ravenScore++;
         element.remove();
-        syncUI();
         document.getElementById('ravenScore').innerText = ravenScore;
         document.getElementById('comboCount').innerText = combo;
         showToast(`${isGolden ? '🌟' : '🦆'} +${total} монет! Комбо x${comboBonus}`);
@@ -849,6 +952,7 @@
     function createRaven() {
         if (!ravenGameActive) return;
         let container = document.getElementById('ravenGameContainer');
+        if(!container) return;
         let raven = document.createElement('div');
         raven.className = 'falling-item';
         let isGolden = Math.random() < 0.1;
@@ -866,19 +970,19 @@
             if (pos >= container.clientHeight - 60) {
                 clearInterval(interval);
                 if(raven.parentNode) raven.remove();
-                combo = 0;
-                document.getElementById('comboCount').innerText = combo;
+                resetCombo();
             }
         }, 20);
         fallIntervals.push(interval);
     }
     
     function startRavenGame() {
-        if (!currentUser) { showToast("Войдите в аккаунт"); return; }
+        if (!currentUser) { showToast("Войдите в аккаунт", true); return; }
         if (ravenGameActive) return;
         ravenGameActive = true;
         ravenScore = 0;
         combo = 0;
+        if(comboTimeout) clearTimeout(comboTimeout);
         document.getElementById('ravenScore').innerText = '0';
         document.getElementById('comboCount').innerText = '0';
         document.getElementById('ravenGameContainer').innerHTML = '';
@@ -891,22 +995,21 @@
         if(ravenInterval) clearInterval(ravenInterval);
         fallIntervals.forEach(i => clearInterval(i));
         fallIntervals = [];
+        if(comboTimeout) clearTimeout(comboTimeout);
         document.getElementById('ravenGameContainer').innerHTML = '';
         document.getElementById('ravenStatus').innerHTML = '⚡ Игра остановлена';
     }
     
-    // Котолапа
     function catchPaw(element, isGolden) {
         if (!currentUser || !pawGameActive) return;
         let base = isGolden ? 25 : 5;
         let streakBonus = 1 + Math.floor(pawStreak / 10);
         if (streakBonus > 5) streakBonus = 5;
         let total = base * streakBonus;
-        currentUser.coins += total;
+        addCoins(total, true, 1);
         pawScore++;
         pawStreak++;
         element.remove();
-        syncUI();
         document.getElementById('pawScore').innerText = pawScore;
         document.getElementById('pawStreak').innerText = pawStreak;
         showToast(`${isGolden ? '🌟' : '🐾'} +${total} монет! Стрик x${streakBonus}`);
@@ -915,6 +1018,7 @@
     function spawnPaw() {
         if (!pawGameActive) return;
         let container = document.getElementById('catPawContainer');
+        if(!container) return;
         let paw = document.createElement('div');
         paw.className = 'falling-item';
         let isGolden = Math.random() < 0.12;
@@ -928,7 +1032,7 @@
     }
     
     function startPawGame() {
-        if (!currentUser) { showToast("Войдите в аккаунт"); return; }
+        if (!currentUser) { showToast("Войдите в аккаунт", true); return; }
         if (pawGameActive) return;
         pawGameActive = true;
         pawScore = 0;
@@ -949,7 +1053,6 @@
         document.getElementById('pawStatus').innerHTML = '⏸ Игра остановлена';
     }
     
-    // Админка
     function updateOnlineStatus() {
         if(currentUser) activeUsers.set(currentUser.username, Date.now());
         let now = Date.now();
@@ -972,9 +1075,10 @@
             users.forEach(user => {
                 let isOnline = activeUsers.has(user.username);
                 let row = tbody.insertRow();
-                row.innerHTML = `<td>${user.username}</td><td>💰 ${Math.floor(user.coins || 0)}</td><td>🎴 ${(user.cardsOwned || []).length}/${allCards.length}</td><td>${isOnline ? '🟢 Онлайн' : '⚫ Офлайн'}</td>`;
+                row.innerHTML = `<td>${user.username}</td><td>💰 ${Math.floor(user.coils || 0)}</td><td>🐹 ${user.totalClicks || 0}</td><td>🎴 ${(user.cardsOwned || []).length}/${allCards.length}</td><td>${isOnline ? '🟢 Онлайн' : '⚫ Офлайн'}</td>`;
             });
         }
+        updateLeaderboard();
     }
     
     function unlockAdmin() {
@@ -987,11 +1091,10 @@
             updateOnlineStatus();
             setInterval(updateOnlineStatus, 5000);
         } else {
-            showToast("❌ Неверный пароль!");
+            showToast("❌ Неверный пароль!", true);
         }
     }
     
-    // Инициализация событий
     document.querySelectorAll(".tab-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
@@ -1004,13 +1107,13 @@
     document.getElementById("loginBtn").onclick = () => {
         let n = prompt("Логин:");
         if(n && loginUser(n)) showToast(`👋 Привет, ${n}!`);
-        else if(n) showToast("❌ Нет такого пользователя");
+        else if(n) showToast("❌ Нет такого пользователя", true);
     };
     
     document.getElementById("registerBtn").onclick = () => {
         let n = prompt("Новый логин:");
         if(n && registerUser(n)) showToast(`✅ Аккаунт ${n} создан! +1600 монет`);
-        else if(n) showToast("❌ Имя занято");
+        else if(n) showToast("❌ Имя занято", true);
     };
     
     document.getElementById("playGameBtn").onclick = startGame30sec;
@@ -1022,10 +1125,10 @@
     document.getElementById("stopPawGame").onclick = stopPawGame;
     document.getElementById("unlockAdminBtn").onclick = unlockAdmin;
     document.getElementById("adminSetCoinsBtn").onclick = () => {
-        if(!isAdminUnlocked) { showToast("❌ Нет доступа"); return; }
+        if(!isAdminUnlocked) { showToast("❌ Нет доступа", true); return; }
         let name = document.getElementById("adminUser").value.trim();
         let val = parseInt(document.getElementById("adminCoins").value);
-        if(!name || isNaN(val)) { showToast("Введите имя и сумму"); return; }
+        if(!name || isNaN(val)) { showToast("Введите имя и сумму", true); return; }
         let target = loadUser(name);
         if(target) {
             target.coins += val;
@@ -1033,12 +1136,13 @@
             if(currentUser && currentUser.username === name) { currentUser.coins = target.coins; syncUI(); }
             showToast(`✅ ${name} +${val} монет`);
             updateOnlineStatus();
-        } else showToast("❌ Пользователь не найден");
+            updateLeaderboard();
+        } else showToast("❌ Пользователь не найден", true);
     };
     document.getElementById("adminGiveCardBtn").onclick = () => {
-        if(!isAdminUnlocked) { showToast("❌ Нет доступа"); return; }
+        if(!isAdminUnlocked) { showToast("❌ Нет доступа", true); return; }
         let name = document.getElementById("adminUser").value.trim();
-        if(!name) { showToast("Введите имя"); return; }
+        if(!name) { showToast("Введите имя", true); return; }
         let target = loadUser(name);
         if(target) {
             let allIds = allCards.map(c => c.id);
@@ -1047,10 +1151,10 @@
             if(currentUser && currentUser.username === name) { currentUser.cardsOwned = target.cardsOwned; syncUI(); }
             showToast(`💎 Все карты выданы ${name}`);
             updateOnlineStatus();
-        } else showToast("❌ Нет пользователя");
+        } else showToast("❌ Нет пользователя", true);
     };
     document.getElementById("adminResetGameBtn").onclick = () => {
-        if(!isAdminUnlocked) { showToast("❌ Нет доступа"); return; }
+        if(!isAdminUnlocked) { showToast("❌ Нет доступа", true); return; }
         if(confirm("Сбросить всех пользователей?")) {
             localStorage.clear();
             currentUser = null;
@@ -1062,7 +1166,7 @@
     
     initClicker();
     syncUI();
-    setInterval(() => { if(currentUser) updateOnlineStatus(); }, 5000);
+    setInterval(() => { if(currentUser) updateOnlineStatus(); updateLeaderboard(); }, 10000);
 </script>
 </body>
 </html>
